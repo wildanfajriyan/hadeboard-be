@@ -36,16 +36,15 @@ func LoadEnv() {
 	}
 
 	AppConfig = &Config{
-		AppPort:          getEnv("PORT", "8001"),
-		DBHost:           getEnv("DB_HOST", "localhost"),
-		DBPort:           getEnv("DB_PORT", "5432"),
-		DBUser:           getEnv("DB_USER", "postgres"),
-		DBPassword:       getEnv("DB_PASSWORD", "postgres"),
-		DBName:           getEnv("DB_NAME", "hadeboardbe"),
-		JWTSecret:        getEnv("JWT_SECRET", "secret"),
-		JWTExpireMinutes: getEnv("JWT_EXPIRY_MINUTES", "60"),
-		JWTRefreshToken:  getEnv("REFRESH_TOKEN_EXPIRED", "24h"),
-		JWTExpire:        getEnv("JWT_EXPIRED", "2h"),
+		AppPort:         getEnv("PORT", "8001"),
+		DBHost:          getEnv("DB_HOST", "localhost"),
+		DBPort:          getEnv("DB_PORT", "5432"),
+		DBUser:          getEnv("DB_USER", "postgres"),
+		DBPassword:      getEnv("DB_PASSWORD", "postgres"),
+		DBName:          getEnv("DB_NAME", "hadeboardbe"),
+		JWTSecret:       getEnv("JWT_SECRET", "secret"),
+		JWTRefreshToken: getEnv("REFRESH_TOKEN_EXPIRED", "24h"),
+		JWTExpire:       getEnv("JWT_EXPIRED", "2h"),
 	}
 }
 
