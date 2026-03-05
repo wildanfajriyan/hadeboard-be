@@ -1,0 +1,29 @@
+package utils
+
+import (
+	"hadeboard-be/config"
+	"log"
+	"time"
+
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
+)
+
+func GenerateToken(userID int64, role, email string, publicID uuid.UUID) (string, error) {
+	secret := config.AppConfig.JWTSecret
+	duration, err := time.ParseDuration(config.AppConfig.JWTExpire)
+	if err != nil {
+		log.Fatal("Failed generate toke")
+	}
+
+	claims := jwt.MapClaims{
+		"user_id": userID,
+		"role":    role,
+		"pub_id":  publicID,
+		"email":   email,
+		"exp":     time.Now().Add(duration).Unix(),
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString([]byte(secret))
+}
