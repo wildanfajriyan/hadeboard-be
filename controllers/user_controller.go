@@ -4,6 +4,8 @@ import (
 	"hadeboard-be/internal/models"
 	"hadeboard-be/services"
 	"hadeboard-be/utils"
+	"math"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/jinzhu/copier"
@@ -75,4 +77,38 @@ func (c *UserController) GetUser(ctx *fiber.Ctx) error {
 	}
 
 	return utils.Success(ctx, "User Found", userResp)
+}
+
+func (c *UserController) GetUserPagination(ctx *fiber.Ctx) error {
+	page, _ := strconv.Atoi(ctx.Query("page", "1"))
+	limit, _ := strconv.Atoi(ctx.Query("limit", "10"))
+	offset := (page - 1) * limit
+	filter := ctx.Query("filter", "")
+	sort := ctx.Query("sort", "")
+
+	users, total, err := c.userService.GetAllPagination(filter, sort, limit, offset)
+	if err != nil {
+		return utils.BadRequest(ctx, "Failed to Get Data", err.Error())
+	}
+
+	var userResp []models.UserResponse
+	err = copier.Copy(&userResp, &users)
+	if err != nil {
+		return utils.BadRequest(ctx, "Internal Server Error", err.Error())
+	}
+
+	meta := utils.PaginationMeta{
+		Page:      page,
+		Limit:     limit,
+		Total:     int(total),
+		TotalPage: int(math.Ceil(float64(total) / float64(limit))),
+		Filter:    filter,
+		Sort:      sort,
+	}
+
+	if total == 0 {
+		utils.NotFoundPagination(ctx, "Users not found", userResp, meta)
+	}
+
+	return utils.SuccessPagination(ctx, "Users Found", userResp, meta)
 }

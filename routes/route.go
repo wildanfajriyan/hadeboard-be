@@ -35,5 +35,6 @@ func Setup(app *fiber.App, userController *controllers.UserController) {
 	}))
 
 	userGroup := apiProtected.Group("/users")
+	userGroup.Get("/page", userController.GetUserPagination)
 	userGroup.Get("/:id", userController.GetUser)
 }
