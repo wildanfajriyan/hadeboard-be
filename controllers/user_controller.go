@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"github.com/jinzhu/copier"
 )
 
@@ -111,4 +112,45 @@ func (c *UserController) GetUserPagination(ctx *fiber.Ctx) error {
 	}
 
 	return utils.SuccessPagination(ctx, "Users Found", userResp, meta)
+}
+
+func (c *UserController) UpdateUser(ctx *fiber.Ctx) error {
+	id := ctx.Params("id")
+
+	publicID, err := uuid.Parse(id)
+	if err != nil {
+		return utils.BadRequest(ctx, "Invalid ID Format", err.Error())
+	}
+
+	var user models.User
+	if err := ctx.BodyParser(&user); err != nil {
+		return utils.BadRequest(ctx, "Failed parse data", err.Error())
+	}
+	user.PublicID = publicID
+
+	if err := c.userService.Update(&user); err != nil {
+		return utils.BadRequest(ctx, "Failed parse data", err.Error())
+	}
+
+	userUpdated, err := c.userService.GetByPublicID(id)
+	if err != nil {
+		return utils.InternalServerError(ctx, "Failed get data", err.Error())
+	}
+
+	var userResp models.UserResponse
+	err = copier.Copy(&userResp, &userUpdated)
+	if err != nil {
+		return utils.InternalServerError(ctx, "Error parsing data", err.Error())
+	}
+
+	return utils.Success(ctx, "Success Update Data", userResp)
+}
+
+func (c *UserController) DeleteUser(ctx *fiber.Ctx) error {
+	id, _ := strconv.Atoi(ctx.Params("id"))
+	if err := c.userService.Delete(uint(id)); err != nil {
+		return utils.InternalServerError(ctx, "Failed remove data", err.Error())
+	}
+
+	return utils.Success(ctx, "Success Remove Data", id)
 }
