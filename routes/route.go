@@ -45,4 +45,5 @@ func Setup(app *fiber.App,
 
 	boardGroup := apiProtected.Group("/boards")
 	boardGroup.Post("/", boardController.CreateBoard)
+	boardGroup.Put("/:id", boardController.UpdateBoard)
 }
