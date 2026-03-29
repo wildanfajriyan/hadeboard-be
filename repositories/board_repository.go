@@ -3,12 +3,14 @@ package repositories
 import (
 	"hadeboard-be/config"
 	"hadeboard-be/internal/models"
+	"time"
 )
 
 type BoardRepository interface {
 	Create(board *models.Board) error
 	Update(board *models.Board) error
 	FindByPublicID(publicID string) (*models.Board, error)
+	AddMember(boardID uint, userIDs []uint) error
 }
 
 type boardRepository struct{}
@@ -34,4 +36,22 @@ func (r *boardRepository) FindByPublicID(publicID string) (*models.Board, error)
 
 	err := config.DB.Where("public_id = ?", publicID).First(&board).Error
 	return &board, err
+}
+
+func (r *boardRepository) AddMember(boardID uint, userIDs []uint) error {
+	if len(userIDs) == 0 {
+		return nil
+	}
+
+	dateNow := time.Now()
+	var members []models.BoardMember
+	for _, userID := range userIDs {
+		members = append(members, models.BoardMember{
+			BoardInternalID: int64(boardID),
+			UserInternalID:  int64(userID),
+			JoinedAt:        dateNow,
+		})
+	}
+
+	return config.DB.Create(&members).Error
 }
