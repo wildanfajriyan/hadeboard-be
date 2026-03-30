@@ -17,3 +17,13 @@ type Board struct {
 	UpdatedAt       time.Time  `json:"updated_at" db:"updated_at"`
 	DueDate         *time.Time `json:"due_date,omitempty" db:"due_date"`
 }
+
+type BoardResponse struct {
+	InternalID      int64     `json:"internal_id"`
+	PublicID        int64     `json:"public_id"`
+	Title           string    `json:"title" `
+	Description     string    `json:"description" `
+	OwnerInternalID int64     `json:"owner_internal_id"`
+	OwnerPublicID   int64     `json:"owner_public_id"`
+	CreatedAt       time.Time `json:"created_at" `
+}

@@ -4,10 +4,13 @@ import (
 	"hadeboard-be/internal/models"
 	"hadeboard-be/services"
 	"hadeboard-be/utils"
+	"math"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
+	"github.com/jinzhu/copier"
 )
 
 type BoardController struct {
@@ -101,4 +104,46 @@ func (c *BoardController) RemoveBoardMembers(ctx *fiber.Ctx) error {
 	}
 
 	return utils.Success(ctx, "Member removed succesfully", nil)
+}
+
+func (c *BoardController) FindAllByUserPaginate(ctx *fiber.Ctx) error {
+	user := ctx.Locals("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+
+	userID, err := uuid.Parse(claims["pub_id"].(string))
+	if err != nil {
+		return utils.BadRequest(ctx, "Failed read request", err.Error())
+	}
+
+	page, _ := strconv.Atoi(ctx.Query("page", "1"))
+	limit, _ := strconv.Atoi(ctx.Query("limit", "10"))
+	offset := (page - 1) * limit
+	filter := ctx.Query("filter", "")
+	sort := ctx.Query("sort", "")
+
+	boards, total, err := c.boardService.FindAllByUserPaginate(userID.String(), filter, sort, limit, offset)
+	if err != nil {
+		return utils.BadRequest(ctx, "Failed to Get Data", err.Error())
+	}
+
+	var boardResp []models.BoardResponse
+	err = copier.Copy(&boardResp, &boards)
+	if err != nil {
+		return utils.BadRequest(ctx, "Internal Server Error", err.Error())
+	}
+
+	meta := utils.PaginationMeta{
+		Page:      page,
+		Limit:     limit,
+		Total:     int(total),
+		TotalPage: int(math.Ceil(float64(total) / float64(limit))),
+		Filter:    filter,
+		Sort:      sort,
+	}
+
+	if total == 0 {
+		utils.NotFoundPagination(ctx, "Boards not found", boardResp, meta)
+	}
+
+	return utils.SuccessPagination(ctx, "Boards Found", boardResp, meta)
 }
