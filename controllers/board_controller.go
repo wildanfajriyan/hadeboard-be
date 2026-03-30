@@ -87,3 +87,18 @@ func (c *BoardController) AddBoardMembers(ctx *fiber.Ctx) error {
 
 	return utils.Success(ctx, "Member added succesfully", nil)
 }
+
+func (c *BoardController) RemoveBoardMembers(ctx *fiber.Ctx) error {
+	publicID := ctx.Params("id")
+
+	var userIDs []string
+	if err := ctx.BodyParser(&userIDs); err != nil {
+		return utils.BadRequest(ctx, "Failed parsing data", err.Error())
+	}
+
+	if err := c.boardService.RemoveMembers(publicID, userIDs); err != nil {
+		return utils.BadRequest(ctx, "Failed removed members", err.Error())
+	}
+
+	return utils.Success(ctx, "Member removed succesfully", nil)
+}
