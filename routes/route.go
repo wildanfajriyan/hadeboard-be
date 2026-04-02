@@ -15,6 +15,7 @@ import (
 func Setup(app *fiber.App,
 	userController *controllers.UserController,
 	boardController *controllers.BoardController,
+	listController *controllers.ListController,
 ) {
 	err := godotenv.Load()
 	if err != nil {
@@ -49,4 +50,7 @@ func Setup(app *fiber.App,
 	boardGroup.Put("/:id", boardController.UpdateBoard)
 	boardGroup.Post("/:id/members", boardController.AddBoardMembers)
 	boardGroup.Delete("/:id/members", boardController.RemoveBoardMembers)
+
+	listGroup := apiProtected.Group("/lists")
+	listGroup.Post("/", listController.CreateList)
 }

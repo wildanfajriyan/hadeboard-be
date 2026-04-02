@@ -29,7 +29,12 @@ func main() {
 	boardService := services.NewBoardService(boardRepository, userRepository, boardMemberRepository)
 	boardController := controllers.NewBoardController(boardService)
 
-	routes.Setup(app, userController, boardController)
+	listPositionRepository := repositories.NewListPositionRepository()
+	listRepository := repositories.NewListRepository()
+	listService := services.NewListService(listRepository, boardRepository, listPositionRepository)
+	listController := controllers.NewListController(listService)
+
+	routes.Setup(app, userController, boardController, listController)
 	log.Println("Server is running on port: ", port)
 	log.Fatal(app.Listen(":" + port))
 }
