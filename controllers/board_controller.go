@@ -106,7 +106,7 @@ func (c *BoardController) RemoveBoardMembers(ctx *fiber.Ctx) error {
 	return utils.Success(ctx, "Member removed succesfully", nil)
 }
 
-func (c *BoardController) FindAllByUserPaginate(ctx *fiber.Ctx) error {
+func (c *BoardController) GetMyBoardPaginate(ctx *fiber.Ctx) error {
 	user := ctx.Locals("user").(*jwt.Token)
 	claims := user.Claims.(jwt.MapClaims)
 
@@ -121,7 +121,7 @@ func (c *BoardController) FindAllByUserPaginate(ctx *fiber.Ctx) error {
 	filter := ctx.Query("filter", "")
 	sort := ctx.Query("sort", "")
 
-	boards, total, err := c.boardService.FindAllByUserPaginate(userID.String(), filter, sort, limit, offset)
+	boards, total, err := c.boardService.GetMyBoardPaginate(userID.String(), filter, sort, limit, offset)
 	if err != nil {
 		return utils.BadRequest(ctx, "Failed to Get Data", err.Error())
 	}

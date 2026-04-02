@@ -12,7 +12,7 @@ type BoardRepository interface {
 	FindByPublicID(publicID string) (*models.Board, error)
 	AddMember(boardID uint, userIDs []uint) error
 	RemoveMembers(boardID uint, userIDs []uint) error
-	FindAllByUserPaginate(userPublicID, filter, sort string, limit, offset int) ([]models.Board, int64, error)
+	GetMyBoardPaginate(userPublicID, filter, sort string, limit, offset int) ([]models.Board, int64, error)
 }
 
 type boardRepository struct{}
@@ -68,7 +68,7 @@ func (r *boardRepository) RemoveMembers(boardID uint, userIDs []uint) error {
 		Delete(&models.BoardMember{}).Error
 }
 
-func (r *boardRepository) FindAllByUserPaginate(userPublicID string, filter string, sort string, limit int, offset int) ([]models.Board, int64, error) {
+func (r *boardRepository) GetMyBoardPaginate(userPublicID string, filter string, sort string, limit int, offset int) ([]models.Board, int64, error) {
 	var board []models.Board
 	var total int64
 
