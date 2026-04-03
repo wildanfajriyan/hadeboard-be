@@ -7,6 +7,10 @@ import (
 )
 
 func SortingListByPosition(lists []models.List, order []uuid.UUID) []models.List {
+	if len(order) == 0 {
+		return lists
+	}
+
 	ordered := make([]models.List, 0, len(order))
 	listMap := make(map[uuid.UUID]models.List)
 

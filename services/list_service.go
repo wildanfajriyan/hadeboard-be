@@ -112,6 +112,10 @@ func (l *listService) GetByBoardID(boardPublicID string) (*ListWithOrder, error)
 		return nil, errors.New("Failed to get list order : " + err.Error())
 	}
 
+	if len(position) == 0 {
+		return nil, errors.New("List position not found")
+	}
+
 	lists, err := l.listRepository.FindByBoardID(boardPublicID)
 	if err != nil {
 		return nil, errors.New("Failed to get list : " + err.Error())
