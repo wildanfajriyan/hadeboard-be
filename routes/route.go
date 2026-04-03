@@ -55,4 +55,5 @@ func Setup(app *fiber.App,
 	listGroup := apiProtected.Group("/lists")
 	listGroup.Post("/", listController.CreateList)
 	listGroup.Put("/:id", listController.UpdateList)
+	listGroup.Delete("/:id", listController.DeleteList)
 }
