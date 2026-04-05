@@ -13,11 +13,11 @@ type Card struct {
 	Title          string     `json:"title" db:"title"`
 	Description    string     `json:"description" db:"description"`
 	Position       int        `json:"position" db:"position"`
-	DueDate        *time.Time `json:"due_date,omitempty" db:"due_ date"`
+	DueDate        *time.Time `json:"due_date,omitempty" db:"due_date"`
 	CreatedAt      time.Time  `json:"created_at" db:"created_at"`
-	UpdatedAt      time.Time  `json:"updated_at" db:"updated_at"`
+	// UpdatedAt      time.Time  `json:"updated_at" db:"updated_at"`
 
-	Assigness   []CardAssignee   `json:"assigness,omitempty" gorm:"foreignKey:CardInteralID;reference:InternalID"`
-	Attachments []CardAttachment `json:"attachments,omitempty" gorm:"foreignKey:CardInteralID;references:InternalID"`
-	Labels      []CardLabel      `json:"labels,omitempty" gorm:"foreignKey:CardInteralID;references:InternalID"`
+	Assignees   []CardAssignee   `json:"assignees,omitempty" gorm:"foreignKey:CardInternalID;references:InternalID"`
+	Attachments []CardAttachment `json:"attachments,omitempty" gorm:"foreignKey:CardInternalID;references:InternalID"`
+	Labels      []CardLabel      `json:"labels,omitempty" gorm:"foreignKey:CardInternalID;references:InternalID"`
 }
