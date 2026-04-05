@@ -57,9 +57,11 @@ func Setup(app *fiber.App,
 	listGroup.Post("/", listController.CreateList)
 	listGroup.Put("/:id", listController.UpdateList)
 	listGroup.Delete("/:id", listController.DeleteList)
+	listGroup.Get("/:list_id/cards", cardController.GetListCard)
 
 	cardGroup := apiProtected.Group("/cards")
 	cardGroup.Post("/", cardController.CreateCard)
 	cardGroup.Put("/:id", cardController.UpdateCard)
 	cardGroup.Delete("/:id", cardController.DeleteCard)
+	cardGroup.Get("/:id", cardController.GetCardDetail)
 }
