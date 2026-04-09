@@ -28,7 +28,7 @@ func (c *UserController) Register(ctx *fiber.Ctx) error {
 	}
 
 	if err := c.userService.Register(user); err != nil {
-		return utils.BadRequest(ctx, "Failed Register", err.Error())
+		return utils.BadRequest(ctx, err.Error(), err.Error())
 	}
 
 	var userResp models.UserResponse
