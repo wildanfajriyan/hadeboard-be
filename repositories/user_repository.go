@@ -1,9 +1,11 @@
 package repositories
 
 import (
+	"context"
 	"hadeboard-be/config"
 	"hadeboard-be/internal/models"
 	"strings"
+	"time"
 )
 
 type UserRepository interface {
@@ -23,27 +25,39 @@ func NewUserRepository() UserRepository {
 }
 
 func (r *userRepository) Create(user *models.User) error {
-	return config.DB.Create(user).Error
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	return config.DB.WithContext(ctx).Create(user).Error
 }
 
 func (r *userRepository) FindByEmail(email string) (*models.User, error) {
 	var user models.User
 
-	err := config.DB.Where("email = ?", email).First(&user).Error
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	err := config.DB.WithContext(ctx).Where("email = ?", email).First(&user).Error
 	return &user, err
 }
 
 func (r *userRepository) FindByID(id uint) (*models.User, error) {
 	var user models.User
 
-	err := config.DB.First(&user, id).Error
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	err := config.DB.WithContext(ctx).First(&user, id).Error
 	return &user, err
 }
 
 func (r *userRepository) FindByPublicID(publicId string) (*models.User, error) {
 	var user models.User
 
-	err := config.DB.Where("public_id = ?", publicId).First(&user).Error
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	err := config.DB.WithContext(ctx).Where("public_id = ?", publicId).First(&user).Error
 	return &user, err
 }
 
@@ -51,7 +65,10 @@ func (r *userRepository) FindAllPagination(filter, sort string, limit, offset in
 	var users []*models.User
 	var total int64
 
-	db := config.DB.Model(&models.User{})
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	db := config.DB.WithContext(ctx).Model(&models.User{})
 
 	if filter != "" {
 		filterPattern := "%" + filter + "%"
@@ -86,11 +103,17 @@ func (r *userRepository) FindAllPagination(filter, sort string, limit, offset in
 }
 
 func (r *userRepository) Update(user *models.User) error {
-	return config.DB.Model(&models.User{}).Where("public_id = ?", user.PublicID).Updates(map[string]any{
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	return config.DB.WithContext(ctx).Model(&models.User{}).Where("public_id = ?", user.PublicID).Updates(map[string]any{
 		"name": user.Name,
 	}).Error
 }
 
 func (r *userRepository) Delete(id uint) error {
-	return config.DB.Delete(&models.User{}, id).Error
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	return config.DB.WithContext(ctx).Delete(&models.User{}, id).Error
 }

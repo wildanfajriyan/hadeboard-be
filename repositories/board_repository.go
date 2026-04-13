@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"context"
 	"hadeboard-be/config"
 	"hadeboard-be/internal/models"
 	"time"
@@ -22,11 +23,17 @@ func NewBoardRepository() BoardRepository {
 }
 
 func (r *boardRepository) Create(board *models.Board) error {
-	return config.DB.Create(board).Error
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	return config.DB.WithContext(ctx).Create(board).Error
 }
 
 func (r *boardRepository) Update(board *models.Board) error {
-	return config.DB.Model(&models.Board{}).Where("public_id = ?", board.PublicID).Updates(map[string]interface{}{
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	return config.DB.WithContext(ctx).Model(&models.Board{}).Where("public_id = ?", board.PublicID).Updates(map[string]interface{}{
 		"title":       board.Title,
 		"description": board.Description,
 		"due_date":    board.DueDate,
@@ -36,7 +43,10 @@ func (r *boardRepository) Update(board *models.Board) error {
 func (r *boardRepository) FindByPublicID(publicID string) (*models.Board, error) {
 	var board models.Board
 
-	err := config.DB.Where("public_id = ?", publicID).First(&board).Error
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	err := config.DB.WithContext(ctx).Where("public_id = ?", publicID).First(&board).Error
 	return &board, err
 }
 
@@ -55,7 +65,10 @@ func (r *boardRepository) AddMember(boardID uint, userIDs []uint) error {
 		})
 	}
 
-	return config.DB.Create(&members).Error
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	return config.DB.WithContext(ctx).Create(&members).Error
 }
 
 func (r *boardRepository) RemoveMembers(boardID uint, userIDs []uint) error {
@@ -63,7 +76,11 @@ func (r *boardRepository) RemoveMembers(boardID uint, userIDs []uint) error {
 		return nil
 	}
 
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
 	return config.DB.
+		WithContext(ctx).
 		Where("board_internal_id = ? AND user_internal_id IN (?)", boardID, userIDs).
 		Delete(&models.BoardMember{}).Error
 }
@@ -72,7 +89,10 @@ func (r *boardRepository) GetMyBoardPaginate(userPublicID string, filter string,
 	var board []models.Board
 	var total int64
 
-	query := config.DB.Model(&models.Board{}).
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	query := config.DB.WithContext(ctx).Model(&models.Board{}).
 		Where("owner_public_id = ? OR internal_id IN ("+
 			"SELECT board_members.board_internal_id FROM board_members "+
 			"JOIN users ON users.internal_id = board_members.user_internal_id "+

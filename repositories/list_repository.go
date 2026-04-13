@@ -1,8 +1,10 @@
 package repositories
 
 import (
+	"context"
 	"hadeboard-be/config"
 	"hadeboard-be/internal/models"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -26,11 +28,17 @@ func NewListRepository() ListRepository {
 }
 
 func (l *listRepository) Create(list *models.List) error {
-	return config.DB.Create(list).Error
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	return config.DB.WithContext(ctx).Create(list).Error
 }
 
 func (l *listRepository) Update(list *models.List) error {
-	return config.DB.Model(&models.List{}).
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	return config.DB.WithContext(ctx).Model(&models.List{}).
 		Where("public_id = ?", list.PublicID).
 		Updates(map[string]interface{}{
 			"title": list.Title,
@@ -38,11 +46,17 @@ func (l *listRepository) Update(list *models.List) error {
 }
 
 func (l *listRepository) Delete(id uint) error {
-	return config.DB.Delete(&models.List{}, id).Error
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	return config.DB.WithContext(ctx).Delete(&models.List{}, id).Error
 }
 
 func (l *listRepository) UpdatePosition(boardPublicID string, position []string) error {
-	return config.DB.Model(&models.ListPosition{}).
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	return config.DB.WithContext(ctx).Model(&models.ListPosition{}).
 		Where("board_internal_id = (SELECT internal_id FROM boards WHERE public_id = ?)", boardPublicID).
 		Update("list_order", position).Error
 }
@@ -50,7 +64,10 @@ func (l *listRepository) UpdatePosition(boardPublicID string, position []string)
 func (l *listRepository) GetCardPosition(listPublicID string) ([]uuid.UUID, error) {
 	var position models.CardPosition
 
-	err := config.DB.Joins("JOIN lists ON list.internal_id = card_positions.list_internal_id").
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	err := config.DB.WithContext(ctx).Joins("JOIN lists ON list.internal_id = card_positions.list_internal_id").
 		Where("lists.public_id = ?", listPublicID).Error
 
 	return position.CardOrder, err
@@ -58,7 +75,11 @@ func (l *listRepository) GetCardPosition(listPublicID string) ([]uuid.UUID, erro
 
 func (l *listRepository) FindByBoardID(boardID string) ([]models.List, error) {
 	var list []models.List
-	err := config.DB.Where("board_public_id = ?", boardID).Order("internal_id ASC").Find(&list).Error
+
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	err := config.DB.WithContext(ctx).Where("board_public_id = ?", boardID).Order("internal_id ASC").Find(&list).Error
 
 	return list, err
 }
@@ -66,14 +87,21 @@ func (l *listRepository) FindByBoardID(boardID string) ([]models.List, error) {
 func (l *listRepository) FindByPublicID(publicID string) (*models.List, error) {
 	var list models.List
 
-	err := config.DB.Where("public_id = ?", publicID).First(&list).Error
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	err := config.DB.WithContext(ctx).Where("public_id = ?", publicID).First(&list).Error
 
 	return &list, err
 }
 
 func (l *listRepository) FindByID(id uint) (*models.List, error) {
 	var list models.List
-	err := config.DB.First(&list, id).Error
+
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	err := config.DB.WithContext(ctx).First(&list, id).Error
 
 	return &list, err
 }

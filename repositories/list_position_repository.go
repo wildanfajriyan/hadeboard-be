@@ -1,8 +1,10 @@
 package repositories
 
 import (
+	"context"
 	"hadeboard-be/config"
 	"hadeboard-be/internal/models"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -23,14 +25,20 @@ func NewListPositionRepository() ListPositionRepository {
 func (l *listPositionRepository) GetByBoard(boardPublicID string) (*models.ListPosition, error) {
 	var position models.ListPosition
 
-	err := config.DB.Joins("JOIN boards ON boards.internal_id = list_positions.board_internal_id").
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	err := config.DB.WithContext(ctx).Joins("JOIN boards ON boards.internal_id = list_positions.board_internal_id").
 		Where("boards.public_id = ?", boardPublicID).First(&position).Error
 
 	return &position, err
 }
 
 func (l *listPositionRepository) CreateOrUpdate(boardPublicID string, listOrder []uuid.UUID) error {
-	return config.DB.Exec(`
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	return config.DB.WithContext(ctx).Exec(`
 		INSERT INTO list_positions (board_internal_id, list_order)
 		SELECT internal_id, ? FROM boards WHERE public_id = ?
 		ON CONFLICT (board_internal_id)
@@ -48,7 +56,10 @@ func (l *listPositionRepository) GetListOrder(boardPublicID string) ([]uuid.UUID
 }
 
 func (l *listPositionRepository) UpdateListOrder(position *models.ListPosition) error {
-	return config.DB.Model(position).
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	return config.DB.WithContext(ctx).Model(position).
 		Where("internal_id = ?", position.InternalID).
 		Update("list_order", position.ListOrder).Error
 }
